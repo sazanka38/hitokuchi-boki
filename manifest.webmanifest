@@ -1,0 +1,23 @@
+{
+  "name": "ひとくち簿記",
+  "short_name": "ひとくち簿記",
+  "description": "すきま時間に簿記3級を学べるミニ問題集",
+  "lang": "ja",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f5f2",
+  "theme_color": "#9aafb3",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

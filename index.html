@@ -1,0 +1,956 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>ひとくち簿記</title>
+<style>
+:root{
+  --bg:#f7f5f2; --card:#ffffff; --text:#484440; --muted:#817b75;
+  --line:#e7e1da; --accent:#8d9b89;
+  --asset:#dce8df; --liability:#eadde3; --equity:#e7e1cf; --revenue:#dce4ed; --expense:#eadfd4;
+  --debit:#e5e0ef; --credit:#e6ddd4; --journal:#e3e8e0; --weak:#eee4dc;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;
+  background:var(--bg);color:var(--text);
+}
+.wrap{max-width:680px;margin:auto;padding:24px 16px 40px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.brand{font-weight:800;font-size:22px}
+.badge{font-size:12px;color:var(--muted);background:#fff;border:1px solid var(--line);padding:6px 10px;border-radius:999px}
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px;
+  box-shadow:0 8px 24px rgba(0,0,0,.04)
+}
+.hidden{display:none!important}
+.hero{margin-bottom:16px}
+.hero h1{font-size:30px;line-height:1.35;margin:0 0 8px}
+.hero p{margin:0;color:var(--muted);line-height:1.7}
+.record-card{
+  margin-top:16px;padding:18px;border-radius:20px;background:#fbfaf8;border:1px solid var(--line);
+}
+.record-title{font-size:14px;font-weight:800;margin-bottom:12px}
+.record-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.record-item{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 8px;text-align:center}
+.record-value{font-size:20px;font-weight:850;line-height:1.2}
+.record-label{font-size:11px;color:var(--muted);margin-top:5px}
+@media (max-width:520px){.record-grid{grid-template-columns:repeat(2,1fr)}}
+.mode-grid{display:grid;gap:14px;margin-top:18px}
+.mode{
+  text-align:left;padding:20px;border-radius:20px;border:1px solid rgba(80,70,60,.10);
+  box-shadow:0 5px 0 rgba(85,75,65,.10),0 9px 18px rgba(80,70,60,.05);
+}
+.mode strong{display:block;font-size:18px;margin-bottom:6px}
+.mode span{font-size:13px;color:var(--muted);font-weight:500;line-height:1.5}
+.mode.account{background:#eef2ed}
+.mode.dc{background:#f1ece8}
+
+.progress{height:8px;background:#ece7e1;border-radius:999px;overflow:hidden;margin-bottom:18px}
+.bar{height:100%;background:var(--accent);width:0%;transition:.25s}
+.kicker{font-size:13px;color:var(--muted);margin-bottom:6px}
+.word{font-size:34px;font-weight:800;letter-spacing:.02em;margin:8px 0 8px}
+.sub{font-size:14px;color:var(--muted);margin-bottom:18px;line-height:1.6}
+.choices{display:grid;gap:10px}
+button{
+  width:100%;border:1px solid rgba(80,70,60,.10);color:var(--text);
+  padding:16px 18px;border-radius:18px;font-size:16px;font-weight:750;cursor:pointer;
+  box-shadow:0 5px 0 rgba(85,75,65,.12),0 9px 18px rgba(80,70,60,.06);
+  transition:transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+button:hover{transform:translateY(-1px)}
+button:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(85,75,65,.12),0 4px 10px rgba(80,70,60,.05)}
+button:disabled{cursor:default}
+.choice[data-cat="資産"]{background:var(--asset)}
+.choice[data-cat="負債"]{background:var(--liability)}
+.choice[data-cat="純資産"]{background:var(--equity)}
+.choice[data-cat="収益"]{background:var(--revenue)}
+.choice[data-cat="費用"]{background:var(--expense)}
+.choice[data-side="借方"]{background:var(--debit)}
+.choice[data-side="貸方"]{background:var(--credit)}
+.choice.correct{outline:3px solid rgba(80,116,92,.28);filter:saturate(1.08)}
+.choice.wrong{outline:3px solid rgba(154,98,98,.22);filter:grayscale(.18)}
+.feedback{
+  display:none;margin-top:16px;padding:14px;border-radius:14px;background:#f7f7f7;
+  line-height:1.7;font-size:14px
+}
+.feedback.show{display:block}
+.feedback.ok{background:#eef8f1}
+.feedback.ng{background:#fff0f0}
+.next{display:none;margin-top:14px;background:var(--accent);color:white;border:none}
+.next.show{display:block}
+.result{text-align:center;display:none}
+.result.show{display:block}
+.score{font-size:48px;font-weight:900;margin:8px 0}
+.small{color:var(--muted);font-size:14px;line-height:1.6}
+.actions{display:grid;gap:10px;margin-top:18px}
+.secondary{background:#fff}
+.back{
+  width:auto;padding:9px 12px;border-radius:14px;background:#fff;font-size:13px;
+  box-shadow:none;margin-bottom:14px
+}
+.record-link{
+  margin-top:12px;background:#f2eee9;font-size:14px;
+}
+.quiz-settings{margin-top:18px;padding:16px;border:1px solid var(--line);border-radius:18px;background:#fbfaf8}
+.setting-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.setting-row + .setting-row{margin-top:12px}
+.setting-label{font-size:13px;font-weight:800}
+.pill-group{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.pill{width:auto;padding:8px 12px;border-radius:999px;background:#fff;box-shadow:none;font-size:12px}
+.pill.active{background:#e3e8e0;border-color:#b9c3b5}
+
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:14px}
+.day-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 6px;text-align:center}
+.day-name{font-size:11px;color:var(--muted)}
+.day-count{font-size:18px;font-weight:850;margin-top:4px}
+.day-acc{font-size:10px;color:var(--muted);margin-top:3px}
+.summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+.summary-box{background:#fbfaf8;border:1px solid var(--line);border-radius:16px;padding:14px}
+.summary-label{font-size:11px;color:var(--muted)}
+.summary-value{font-size:22px;font-weight:850;margin-top:4px}
+.section-title{font-size:18px;font-weight:850;margin:4px 0 6px}
+.section-note{font-size:13px;color:var(--muted);line-height:1.6}
+.footer{margin-top:16px;text-align:center;color:var(--muted);font-size:12px}
+@media (max-width:520px){.week-grid{grid-template-columns:repeat(7,1fr);gap:5px}.day-card{padding:8px 3px}.day-count{font-size:16px}}
+@media (max-width:420px){.word{font-size:30px}.card{padding:18px}.hero h1{font-size:27px}}
+</style>
+  <meta name="theme-color" content="#9aafb3">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="ひとくち簿記">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="brand">ひとくち簿記</div>
+    <div class="badge" id="streak">今日 0セット</div>
+  </div>
+
+  <section id="home">
+    <div class="card hero">
+      <div class="kicker">今日はどれにする？</div>
+      <h1>今日も、ひとくち。</h1>
+      <p>ごはん食べながら、電車に乗りながら、<br>ちょっとだけ簿記に触れるためのミニ問題集。</p>
+      <div class="record-card">
+        <div class="record-title">今日のきろく</div>
+        <div class="record-grid">
+          <div class="record-item">
+            <div class="record-value" id="todayAnswers">0問</div>
+            <div class="record-label">回答</div>
+          </div>
+          <div class="record-item">
+            <div class="record-value" id="todayAccuracy">—</div>
+            <div class="record-label">正解率</div>
+          </div>
+          <div class="record-item">
+            <div class="record-value" id="streakDays">0日</div>
+            <div class="record-label">連続</div>
+          </div>
+          <div class="record-item">
+            <div class="record-value" id="totalAnswers">0問</div>
+            <div class="record-label">累計</div>
+          </div>
+        </div>
+      </div>
+      <button class="record-link" id="openRecords">学習きろくを見る</button>
+      <div class="quiz-settings">
+        <div class="setting-row">
+          <div class="setting-label">レベル</div>
+          <div class="pill-group">
+            <button class="pill active" data-level="basic">きほん</button>
+            <button class="pill" data-level="standard">ちょいむず</button>
+            <button class="pill" data-level="all">まぜる</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-label">問題数</div>
+          <div class="pill-group">
+            <button class="pill active" data-count="5">5問だけ</button>
+            <button class="pill" data-count="10">10問やる</button>
+          </div>
+        </div>
+      </div>
+      <div class="mode-grid">
+        <button class="mode account" id="translateMode" style="background:#e8e4dc">
+          <strong>ことば → 勘定科目</strong>
+          <span>取引のことばを、簿記の勘定科目に変換する練習</span>
+        </button>
+        <button class="mode dc" id="positionMode" style="background:#e2e8e5">
+          <strong>B/S・P/Lの位置</strong>
+          <span>資産・負債・純資産・収益・費用が、どこにあるか覚える</span>
+        </button>
+        <button class="mode account" id="accountMode">
+          <strong>勘定科目クイズ</strong>
+          <span>資産・負債・純資産・収益・費用にグループ分け</span>
+        </button>
+        <button class="mode dc" id="dcMode">
+          <strong>借方・貸方クイズ</strong>
+          <span>勘定科目が増えたとき、どちら側に入るかを当てる</span>
+        </button>
+        <button class="mode journal" id="journalMode" style="background:var(--journal)">
+          <strong>仕訳クイズ</strong>
+          <span>取引を読んで、正しい仕訳を4つの中から選ぶ</span>
+        </button>
+        <button class="mode weak" id="weakMode" style="background:var(--weak)">
+          <strong>苦手克服 <small id="weakCount" style="font-size:12px;font-weight:600"></small></strong>
+          <span id="weakDesc">まちがえた問題を、できるまで。</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+
+  <section id="recordsSection" class="hidden">
+    <button class="back" id="recordsBack">← トップへ戻る</button>
+    <div class="card">
+      <div class="kicker">学習きろく</div>
+      <div class="section-title">今週のきろく</div>
+      <div class="section-note">1日ごとの回答数と正解率をまとめて見られます。</div>
+      <div class="week-grid" id="weekGrid"></div>
+
+      <div class="summary-grid">
+        <div class="summary-box">
+          <div class="summary-label">今週の回答</div>
+          <div class="summary-value" id="weekAnswers">0問</div>
+        </div>
+        <div class="summary-box">
+          <div class="summary-label">今週の正解率</div>
+          <div class="summary-value" id="weekAccuracy">—</div>
+        </div>
+        <div class="summary-box">
+          <div class="summary-label">いちばん解いた日</div>
+          <div class="summary-value" id="bestDay">—</div>
+        </div>
+        <div class="summary-box">
+          <div class="summary-label">苦手問題</div>
+          <div class="summary-value" id="recordWeakCount">0問</div>
+        </div>
+      </div>
+
+      <div class="summary-grid" style="margin-top:18px">
+        <div class="summary-box">
+          <div class="summary-label">連続学習</div>
+          <div class="summary-value" id="recordStreak">0日</div>
+        </div>
+        <div class="summary-box">
+          <div class="summary-label">累計回答</div>
+          <div class="summary-value" id="recordTotal">0問</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="quizSection" class="hidden">
+    <button class="back" id="backHome">← モードを選び直す</button>
+    <div class="card" id="quizCard">
+      <div class="progress"><div class="bar" id="bar"></div></div>
+      <div class="kicker" id="modeLabel">勘定科目クイズ</div>
+      <div class="kicker" id="count">1 / 5</div>
+      <div class="word" id="word">現金</div>
+      <div class="sub" id="sub">この勘定科目はどのグループ？</div>
+      <div class="choices" id="choices"></div>
+      <div class="feedback" id="feedback"></div>
+      <button class="next" id="nextBtn">次の問題へ</button>
+    </div>
+
+    <div class="card result" id="resultCard">
+      <div class="kicker">今回の結果</div>
+      <div class="score" id="score">5 / 5</div>
+      <div id="message">いい感じ！</div>
+      <div class="small" id="missed"></div>
+      <div class="actions">
+        <button id="retryMissed">まちがえた問題だけ</button>
+        <button class="secondary" id="restart">もう5問やる</button>
+        <button class="secondary" id="resultHome">モード選択へ</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer">やる気も『ひとくち』から。</div>
+</div>
+
+<script>
+const CATEGORIES = ["資産","負債","純資産","収益","費用"];
+
+const ACCOUNT_ITEMS = [
+  {word:"現金",cat:"資産",ex:"手元にあるお金。持っている財産なので資産。"},
+  {word:"普通預金",cat:"資産",ex:"銀行に預けているお金。自分の財産なので資産。"},
+  {word:"売掛金",cat:"資産",ex:"商品を売ったけど、まだ受け取っていない代金。あとで受け取れる権利なので資産。"},
+  {word:"商品",cat:"資産",ex:"販売するために持っているもの。会社の財産なので資産。"},
+  {word:"備品",cat:"資産",ex:"机・パソコンなど長く使うもの。会社の財産なので資産。"},
+  {word:"貸付金",cat:"資産",ex:"貸しているお金。返してもらえる権利なので資産。"},
+  {word:"買掛金",cat:"負債",ex:"商品を仕入れたけど、まだ払っていない代金。あとで払う義務なので負債。"},
+  {word:"借入金",cat:"負債",ex:"銀行などから借りたお金。返す義務があるので負債。"},
+  {word:"未払金",cat:"負債",ex:"商品売買以外で、まだ払っていない代金。支払義務なので負債。"},
+  {word:"前受金",cat:"負債",ex:"商品やサービスを渡す前に先にもらったお金。あとで提供する義務があるので負債。"},
+  {word:"資本金",cat:"純資産",ex:"事業の元手として出資されたお金。純資産。"},
+  {word:"売上",cat:"収益",ex:"商品やサービスを売って得たもうけのもと。収益。"},
+  {word:"受取利息",cat:"収益",ex:"預金などから受け取る利息。会社の収入なので収益。"},
+  {word:"仕入",cat:"費用",ex:"販売する商品の仕入れにかかった額。費用。"},
+  {word:"給料",cat:"費用",ex:"従業員へ支払う給与。事業活動のための支出なので費用。"},
+  {word:"通信費",cat:"費用",ex:"電話代・ネット代・切手代など。費用。"},
+  {word:"水道光熱費",cat:"費用",ex:"電気・ガス・水道代など。費用。"},
+  {word:"旅費交通費",cat:"費用",ex:"電車代・バス代・出張交通費など。費用。"}
+  ,{word:"当座預金",cat:"資産",ex:"銀行預金の一種。会社が自由に使える財産なので資産。"}
+  ,{word:"受取手形",cat:"資産",ex:"将来、代金を受け取れる権利なので資産。"}
+  ,{word:"未収入金",cat:"資産",ex:"商品売買以外で、まだ受け取っていない代金。受け取る権利なので資産。"}
+  ,{word:"前払金",cat:"資産",ex:"商品やサービスを受け取る前に先に払ったお金。あとで受け取る権利なので資産。"}
+  ,{word:"仮払金",cat:"資産",ex:"用途や金額がまだ確定していない仮の支払い。いったん資産で処理。"}
+  ,{word:"支払手形",cat:"負債",ex:"将来代金を支払う約束。支払義務なので負債。"}
+  ,{word:"預り金",cat:"負債",ex:"一時的に預かっているお金。あとで支払う・返す義務があるので負債。"}
+  ,{word:"仮受金",cat:"負債",ex:"内容がまだわからない入金。いったん負債で処理。"}
+  ,{word:"受取手数料",cat:"収益",ex:"手数料として受け取った金額。収益。"}
+  ,{word:"消耗品費",cat:"費用",ex:"文房具など比較的すぐ使うものにかかった費用。"}
+  ,{word:"広告宣伝費",cat:"費用",ex:"広告や宣伝にかかったお金。費用。"}
+  ,{word:"支払家賃",cat:"費用",ex:"事務所などの家賃。事業活動のための支出なので費用。"}
+  ,{word:"支払利息",cat:"費用",ex:"借入金などに対して支払う利息。費用。"}
+  ,{word:"租税公課",cat:"費用",ex:"事業に関係する税金や公的な負担の一部を処理する費用科目。"}
+
+  ,{word:"立替金",cat:"資産",level:"standard",ex:"会社が一時的に他人の分を立て替えた金額。あとで受け取れるので資産。"}
+  ,{word:"前払費用",cat:"資産",level:"standard",ex:"翌期以降のサービスに対して先に支払った費用。将来サービスを受ける権利なので資産。"}
+  ,{word:"未収収益",cat:"資産",level:"standard",ex:"すでに発生しているが、まだ受け取っていない収益。受け取る権利なので資産。"}
+  ,{word:"未払費用",cat:"負債",level:"standard",ex:"すでに発生しているが、まだ支払っていない費用。支払義務なので負債。"}
+  ,{word:"前受収益",cat:"負債",level:"standard",ex:"翌期以降のサービス分を先に受け取った金額。将来サービスを提供する義務なので負債。"}
+  ,{word:"貸倒引当金",cat:"資産",level:"standard",ex:"売掛金などの回収不能見込額を表す資産の評価勘定。3級では資産から差し引いて表示する。"}
+  ,{word:"減価償却累計額",cat:"資産",level:"standard",ex:"固定資産の減価償却額の累計を表す資産の評価勘定。固定資産から差し引いて表示する。"}
+  ,{word:"貸倒引当金繰入",cat:"費用",level:"standard",ex:"貸倒れに備えて当期の費用として計上する科目。"}
+  ,{word:"減価償却費",cat:"費用",level:"standard",ex:"固定資産の取得原価を使用期間に配分するための費用。"}
+
+];
+
+const DC_ITEMS = [
+  {word:"現金が増えた",side:"借方",ex:"資産は増えると借方。現金は資産なので、増加は借方。"},
+  {word:"売掛金が増えた",side:"借方",ex:"売掛金は資産。資産の増加は借方。"},
+  {word:"備品が増えた",side:"借方",ex:"備品は資産。資産の増加は借方。"},
+  {word:"借入金が増えた",side:"貸方",ex:"借入金は負債。負債の増加は貸方。"},
+  {word:"買掛金が増えた",side:"貸方",ex:"買掛金は負債。負債の増加は貸方。"},
+  {word:"資本金が増えた",side:"貸方",ex:"純資産の増加は貸方。"},
+  {word:"売上が増えた",side:"貸方",ex:"収益の増加は貸方。売上は収益なので貸方。"},
+  {word:"受取利息が増えた",side:"貸方",ex:"収益の増加は貸方。"},
+  {word:"仕入が増えた",side:"借方",ex:"費用の増加は借方。仕入は費用なので借方。"},
+  {word:"給料が増えた",side:"借方",ex:"費用の増加は借方。"},
+  {word:"通信費が増えた",side:"借方",ex:"費用の増加は借方。通信費は費用。"},
+  {word:"水道光熱費が増えた",side:"借方",ex:"費用の増加は借方。"}
+  ,{word:"未収入金が増えた",side:"借方",ex:"未収入金は資産。資産の増加は借方。"}
+  ,{word:"前払金が増えた",side:"借方",ex:"前払金は資産。資産の増加は借方。"}
+  ,{word:"支払手形が増えた",side:"貸方",ex:"支払手形は負債。負債の増加は貸方。"}
+  ,{word:"預り金が増えた",side:"貸方",ex:"預り金は負債。負債の増加は貸方。"}
+  ,{word:"受取手数料が増えた",side:"貸方",ex:"受取手数料は収益。収益の増加は貸方。"}
+  ,{word:"消耗品費が増えた",side:"借方",ex:"消耗品費は費用。費用の増加は借方。"}
+  ,{word:"広告宣伝費が増えた",side:"借方",ex:"広告宣伝費は費用。費用の増加は借方。"}
+  ,{word:"支払家賃が増えた",side:"借方",ex:"支払家賃は費用。費用の増加は借方。"}
+  ,{word:"支払利息が増えた",side:"借方",ex:"支払利息は費用。費用の増加は借方。"}
+
+  ,{word:"現金が減った",side:"貸方",level:"standard",ex:"現金は資産。資産の減少は貸方。"}
+  ,{word:"売掛金が減った",side:"貸方",level:"standard",ex:"売掛金は資産。資産の減少は貸方。"}
+  ,{word:"買掛金が減った",side:"借方",level:"standard",ex:"買掛金は負債。負債の減少は借方。"}
+  ,{word:"借入金が減った",side:"借方",level:"standard",ex:"借入金は負債。負債の減少は借方。"}
+  ,{word:"売上が減った",side:"借方",level:"standard",ex:"売上は収益。収益の減少は借方。"}
+  ,{word:"仕入が減った",side:"貸方",level:"standard",ex:"仕入は費用。費用の減少は貸方。"}
+  ,{word:"資本金が減った",side:"借方",level:"standard",ex:"資本金は純資産。純資産の減少は借方。"}
+  ,{word:"未払費用が増えた",side:"貸方",level:"standard",ex:"未払費用は負債。負債の増加は貸方。"}
+
+];
+
+
+const JOURNAL_ITEMS = [
+  {
+    word:"商品500円を仕入れ、代金は現金で支払った。",
+    answer:"（借）仕入 500 ／（貸）現金 500",
+    options:[
+      "（借）仕入 500 ／（貸）現金 500",
+      "（借）現金 500 ／（貸）仕入 500",
+      "（借）商品 500 ／（貸）現金 500",
+      "（借）仕入 500 ／（貸）買掛金 500"
+    ],
+    ex:"商品を仕入れたので費用の「仕入」が増えて借方。現金という資産が減るので貸方。"
+  },
+  {
+    word:"商品800円を売り、代金は現金で受け取った。",
+    answer:"（借）現金 800 ／（貸）売上 800",
+    options:[
+      "（借）現金 800 ／（貸）売上 800",
+      "（借）売上 800 ／（貸）現金 800",
+      "（借）売掛金 800 ／（貸）売上 800",
+      "（借）仕入 800 ／（貸）現金 800"
+    ],
+    ex:"現金という資産が増えるので借方。売上という収益が増えるので貸方。"
+  },
+  {
+    word:"商品1,200円を仕入れ、代金は掛けとした。",
+    answer:"（借）仕入 1,200 ／（貸）買掛金 1,200",
+    options:[
+      "（借）仕入 1,200 ／（貸）買掛金 1,200",
+      "（借）買掛金 1,200 ／（貸）仕入 1,200",
+      "（借）仕入 1,200 ／（貸）現金 1,200",
+      "（借）売掛金 1,200 ／（貸）売上 1,200"
+    ],
+    ex:"仕入という費用が増えるので借方。商品代金を後で支払う義務＝買掛金が増えるので貸方。"
+  },
+  {
+    word:"商品2,000円を売り、代金は掛けとした。",
+    answer:"（借）売掛金 2,000 ／（貸）売上 2,000",
+    options:[
+      "（借）売掛金 2,000 ／（貸）売上 2,000",
+      "（借）売上 2,000 ／（貸）売掛金 2,000",
+      "（借）現金 2,000 ／（貸）売上 2,000",
+      "（借）仕入 2,000 ／（貸）買掛金 2,000"
+    ],
+    ex:"後で代金を受け取る権利＝売掛金という資産が増えるので借方。売上という収益が増えるので貸方。"
+  },
+  {
+    word:"買掛金600円を現金で支払った。",
+    answer:"（借）買掛金 600 ／（貸）現金 600",
+    options:[
+      "（借）買掛金 600 ／（貸）現金 600",
+      "（借）現金 600 ／（貸）買掛金 600",
+      "（借）仕入 600 ／（貸）現金 600",
+      "（借）買掛金 600 ／（貸）仕入 600"
+    ],
+    ex:"買掛金という負債が減るので借方。現金という資産が減るので貸方。"
+  },
+  {
+    word:"売掛金900円を現金で回収した。",
+    answer:"（借）現金 900 ／（貸）売掛金 900",
+    options:[
+      "（借）現金 900 ／（貸）売掛金 900",
+      "（借）売掛金 900 ／（貸）現金 900",
+      "（借）現金 900 ／（貸）売上 900",
+      "（借）売掛金 900 ／（貸）売上 900"
+    ],
+    ex:"現金という資産が増えるので借方。売掛金という資産が減るので貸方。売上は販売時にすでに計上済み。"
+  },
+  {
+    word:"銀行から現金3,000円を借り入れた。",
+    answer:"（借）現金 3,000 ／（貸）借入金 3,000",
+    options:[
+      "（借）現金 3,000 ／（貸）借入金 3,000",
+      "（借）借入金 3,000 ／（貸）現金 3,000",
+      "（借）現金 3,000 ／（貸）売上 3,000",
+      "（借）貸付金 3,000 ／（貸）現金 3,000"
+    ],
+    ex:"現金という資産が増えるので借方。返済義務である借入金という負債が増えるので貸方。"
+  },
+  {
+    word:"借入金1,000円を現金で返済した。利息は考えない。",
+    answer:"（借）借入金 1,000 ／（貸）現金 1,000",
+    options:[
+      "（借）借入金 1,000 ／（貸）現金 1,000",
+      "（借）現金 1,000 ／（貸）借入金 1,000",
+      "（借）支払利息 1,000 ／（貸）現金 1,000",
+      "（借）貸付金 1,000 ／（貸）現金 1,000"
+    ],
+    ex:"借入金という負債が減るので借方。現金という資産が減るので貸方。"
+  },
+  {
+    word:"事務所の家賃700円を現金で支払った。",
+    answer:"（借）支払家賃 700 ／（貸）現金 700",
+    options:[
+      "（借）支払家賃 700 ／（貸）現金 700",
+      "（借）現金 700 ／（貸）支払家賃 700",
+      "（借）建物 700 ／（貸）現金 700",
+      "（借）支払家賃 700 ／（貸）未払金 700"
+    ],
+    ex:"支払家賃という費用が増えるので借方。現金という資産が減るので貸方。"
+  },
+  {
+    word:"電話料金400円を現金で支払った。",
+    answer:"（借）通信費 400 ／（貸）現金 400",
+    options:[
+      "（借）通信費 400 ／（貸）現金 400",
+      "（借）現金 400 ／（貸）通信費 400",
+      "（借）消耗品費 400 ／（貸）現金 400",
+      "（借）通信費 400 ／（貸）未払金 400"
+    ],
+    ex:"電話料金は通信費。費用が増えるので借方、現金という資産が減るので貸方。"
+  },
+  {
+    word:"備品1,500円を購入し、代金は現金で支払った。",
+    answer:"（借）備品 1,500 ／（貸）現金 1,500",
+    options:[
+      "（借）備品 1,500 ／（貸）現金 1,500",
+      "（借）現金 1,500 ／（貸）備品 1,500",
+      "（借）仕入 1,500 ／（貸）現金 1,500",
+      "（借）消耗品費 1,500 ／（貸）現金 1,500"
+    ],
+    ex:"備品という資産が増えるので借方。現金という資産が減るので貸方。"
+  },
+  {
+    word:"従業員への給料1,000円を現金で支払った。",
+    answer:"（借）給料 1,000 ／（貸）現金 1,000",
+    options:[
+      "（借）給料 1,000 ／（貸）現金 1,000",
+      "（借）現金 1,000 ／（貸）給料 1,000",
+      "（借）給料 1,000 ／（貸）未払金 1,000",
+      "（借）仕入 1,000 ／（貸）現金 1,000"
+    ],
+    ex:"給料という費用が増えるので借方。現金という資産が減るので貸方。"
+  },
+  {
+    word:"商品1,000円を仕入れ、代金は後日支払うことにした。",
+    answer:"（借）仕入 1,000 ／（貸）買掛金 1,000",
+    options:[
+      "（借）仕入 1,000 ／（貸）買掛金 1,000",
+      "（借）買掛金 1,000 ／（貸）仕入 1,000",
+      "（借）仕入 1,000 ／（貸）現金 1,000",
+      "（借）売掛金 1,000 ／（貸）売上 1,000"
+    ],
+    ex:"仕入という費用が増えるので借方。掛けで仕入れたので買掛金という負債が増えて貸方。"
+  },
+  {
+    word:"広告代600円を現金で支払った。",
+    answer:"（借）広告宣伝費 600 ／（貸）現金 600",
+    options:[
+      "（借）広告宣伝費 600 ／（貸）現金 600",
+      "（借）現金 600 ／（貸）広告宣伝費 600",
+      "（借）通信費 600 ／（貸）現金 600",
+      "（借）広告宣伝費 600 ／（貸）未払金 600"
+    ],
+    ex:"広告代は広告宣伝費。費用が増えるので借方、現金という資産が減るので貸方。"
+  },
+  {
+    word:"文房具300円を現金で購入し、消耗品費として処理した。",
+    answer:"（借）消耗品費 300 ／（貸）現金 300",
+    options:[
+      "（借）消耗品費 300 ／（貸）現金 300",
+      "（借）現金 300 ／（貸）消耗品費 300",
+      "（借）備品 300 ／（貸）現金 300",
+      "（借）仕入 300 ／（貸）現金 300"
+    ],
+    ex:"問題文で消耗品費として処理すると指定されているので、費用の消耗品費を借方に記入。現金は減るので貸方。"
+  },
+  {
+    word:"普通預金から借入金2,000円を返済した。利息は考えない。",
+    answer:"（借）借入金 2,000 ／（貸）普通預金 2,000",
+    options:[
+      "（借）借入金 2,000 ／（貸）普通預金 2,000",
+      "（借）普通預金 2,000 ／（貸）借入金 2,000",
+      "（借）支払利息 2,000 ／（貸）普通預金 2,000",
+      "（借）貸付金 2,000 ／（貸）普通預金 2,000"
+    ],
+    ex:"借入金という負債が減るので借方。普通預金という資産が減るので貸方。"
+  },
+  {
+    word:"受取手数料500円を現金で受け取った。",
+    answer:"（借）現金 500 ／（貸）受取手数料 500",
+    options:[
+      "（借）現金 500 ／（貸）受取手数料 500",
+      "（借）受取手数料 500 ／（貸）現金 500",
+      "（借）現金 500 ／（貸）売上 500",
+      "（借）未収入金 500 ／（貸）受取手数料 500"
+    ],
+    ex:"現金という資産が増えるので借方。受取手数料という収益が増えるので貸方。"
+  },
+  {
+    word:"商品代金800円のうち、300円を前もって現金で受け取った。",
+    answer:"（借）現金 300 ／（貸）前受金 300",
+    options:[
+      "（借）現金 300 ／（貸）前受金 300",
+      "（借）前受金 300 ／（貸）現金 300",
+      "（借）現金 300 ／（貸）売上 300",
+      "（借）売掛金 300 ／（貸）売上 300"
+    ],
+    ex:"まだ商品を渡していないため売上ではなく前受金。現金が増えるので借方、前受金という負債が増えるので貸方。"
+  }
+,
+  {
+    word:"決算で、当期分の家賃200円がまだ未払いであることがわかった。",
+    answer:"（借）支払家賃 200 ／（貸）未払費用 200", level:"standard",
+    options:["（借）支払家賃 200 ／（貸）未払費用 200","（借）未払費用 200 ／（貸）支払家賃 200","（借）支払家賃 200 ／（貸）現金 200","（借）前払費用 200 ／（貸）支払家賃 200"],
+    ex:"当期分の家賃は費用として借方。まだ支払っていないため未払費用という負債を貸方に計上する。"
+  },
+  {
+    word:"決算で、翌期分の家賃300円をすでに支払っていることがわかった。",
+    answer:"（借）前払費用 300 ／（貸）支払家賃 300", level:"standard",
+    options:["（借）前払費用 300 ／（貸）支払家賃 300","（借）支払家賃 300 ／（貸）前払費用 300","（借）未払費用 300 ／（貸）支払家賃 300","（借）支払家賃 300 ／（貸）現金 300"],
+    ex:"翌期分は当期の費用から除き、将来サービスを受ける権利である前払費用へ振り替える。"
+  },
+  {
+    word:"備品6,000円について、決算で1,000円の減価償却を行った。",
+    answer:"（借）減価償却費 1,000 ／（貸）減価償却累計額 1,000", level:"standard",
+    options:["（借）減価償却費 1,000 ／（貸）減価償却累計額 1,000","（借）減価償却累計額 1,000 ／（貸）減価償却費 1,000","（借）備品 1,000 ／（貸）減価償却費 1,000","（借）減価償却費 1,000 ／（貸）備品 1,000"],
+    ex:"間接法では減価償却費を借方、減価償却累計額を貸方に計上する。"
+  },
+  {
+    word:"決算で、売掛金に対する貸倒引当金を100円追加で設定した。",
+    answer:"（借）貸倒引当金繰入 100 ／（貸）貸倒引当金 100", level:"standard",
+    options:["（借）貸倒引当金繰入 100 ／（貸）貸倒引当金 100","（借）貸倒引当金 100 ／（貸）貸倒引当金繰入 100","（借）貸倒損失 100 ／（貸）売掛金 100","（借）売掛金 100 ／（貸）貸倒引当金 100"],
+    ex:"必要な貸倒引当金を追加設定する場合、費用の貸倒引当金繰入を借方、貸倒引当金を貸方に計上する。"
+  }
+
+];
+
+
+const TRANSLATE_ITEMS = [
+  {word:"商品を売り、代金は後日受け取る。後日受け取る代金は？",answer:"売掛金",options:["売掛金","買掛金","未払金","借入金"],ex:"商品を掛けで売ったとき、あとで受け取る代金は「売掛金」。"},
+  {word:"商品を仕入れ、代金は後日支払う。後日支払う代金は？",answer:"買掛金",options:["買掛金","売掛金","未収入金","貸付金"],ex:"商品を掛けで仕入れたとき、あとで支払う代金は「買掛金」。"},
+  {word:"銀行からお金を借りた。借りたお金を表す勘定科目は？",answer:"借入金",options:["借入金","貸付金","売掛金","資本金"],ex:"他者から借りたお金は「借入金」。"},
+  {word:"取引先にお金を貸した。貸したお金を表す勘定科目は？",answer:"貸付金",options:["貸付金","借入金","前受金","買掛金"],ex:"他者に貸したお金は「貸付金」。"},
+  {word:"商品を販売したときの収益は？",answer:"売上",options:["売上","仕入","受取手数料","資本金"],ex:"商品の販売による収益は「売上」。"},
+  {word:"販売するための商品を購入したときの費用は？",answer:"仕入",options:["仕入","売上","備品","消耗品費"],ex:"販売目的の商品を購入したときは「仕入」。"},
+  {word:"電話料金やインターネット料金を支払った。使う勘定科目は？",answer:"通信費",options:["通信費","水道光熱費","旅費交通費","広告宣伝費"],ex:"電話・通信にかかった費用は「通信費」。"},
+  {word:"電気代・ガス代・水道代を支払った。使う勘定科目は？",answer:"水道光熱費",options:["水道光熱費","通信費","支払家賃","租税公課"],ex:"電気・ガス・水道などは「水道光熱費」。"},
+  {word:"従業員に給与を支払った。使う勘定科目は？",answer:"給料",options:["給料","仕入","支払利息","受取手数料"],ex:"従業員への給与は「給料」。"},
+  {word:"机やパソコンなど、長く使うものを購入した。代表的な勘定科目は？",answer:"備品",options:["備品","仕入","売上","給料"],ex:"事業で長く使う机・パソコンなどは、3級の基本では「備品」として扱う問題が多い。"}
+];
+
+const POSITION_ITEMS = [
+  {word:"資産",answer:"B/S 左",options:["B/S 左","B/S 右","P/L 左","P/L 右"],ex:"資産は貸借対照表（B/S）の左側。"},
+  {word:"負債",answer:"B/S 右",options:["B/S 左","B/S 右","P/L 左","P/L 右"],ex:"負債は貸借対照表（B/S）の右側。"},
+  {word:"純資産",answer:"B/S 右",options:["B/S 左","B/S 右","P/L 左","P/L 右"],ex:"純資産は貸借対照表（B/S）の右側。"},
+  {word:"費用",answer:"P/L 左",options:["B/S 左","B/S 右","P/L 左","P/L 右"],ex:"費用は損益計算書（P/L）の左側。"},
+  {word:"収益",answer:"P/L 右",options:["B/S 左","B/S 右","P/L 左","P/L 右"],ex:"収益は損益計算書（P/L）の右側。"}
+];
+
+let mode="account", quiz=[], index=0, correct=0, missed=[], locked=false;
+
+function shuffle(arr){ return [...arr].sort(()=>Math.random()-0.5); }
+
+function problemKey(q, sourceMode){
+  return sourceMode + "::" + q.word;
+}
+
+function loadWeak(){
+  try { return JSON.parse(localStorage.getItem("boki_weak") || "{}"); }
+  catch(e){ return {}; }
+}
+
+function saveWeak(data){
+  localStorage.setItem("boki_weak", JSON.stringify(data));
+}
+
+function registerWeak(q, sourceMode){
+  const data=loadWeak(), key=problemKey(q, sourceMode);
+  if(!data[key]) data[key]={mode:sourceMode, word:q.word, correctStreak:0};
+  data[key].correctStreak=0;
+  saveWeak(data);
+}
+
+function markWeakCorrect(q, sourceMode){
+  const data=loadWeak(), key=problemKey(q, sourceMode);
+  if(!data[key]) return false;
+  data[key].correctStreak=(data[key].correctStreak||0)+1;
+  const mastered=data[key].correctStreak>=2;
+  if(mastered) delete data[key];
+  saveWeak(data);
+  return mastered;
+}
+
+function allItemsWithMode(){
+  return [
+    ...TRANSLATE_ITEMS.map(q=>({q, sourceMode:"translate"})),
+    ...POSITION_ITEMS.map(q=>({q, sourceMode:"position"})),
+    ...ACCOUNT_ITEMS.map(q=>({q, sourceMode:"account"})),
+    ...DC_ITEMS.map(q=>({q, sourceMode:"dc"})),
+    ...JOURNAL_ITEMS.map(q=>({q, sourceMode:"journal"}))
+  ];
+}
+
+function weakItems(){
+  const data=loadWeak();
+  const all=allItemsWithMode();
+  return Object.values(data).map(w=>{
+    const found=all.find(x=>x.sourceMode===w.mode && x.q.word===w.word);
+    return found ? {...found.q, _sourceMode:w.mode} : null;
+  }).filter(Boolean);
+}
+
+function updateWeakCount(){
+  const n=weakItems().length;
+  document.getElementById("weakCount").textContent=n ? `・${n}問` : "";
+  document.getElementById("weakDesc").textContent=n ? "まちがえた問題を、できるまで。" : "苦手なし！いい感じ◎";
+}
+
+function localDateKey(date=new Date()){
+  const y=date.getFullYear();
+  const m=String(date.getMonth()+1).padStart(2,"0");
+  const d=String(date.getDate()).padStart(2,"0");
+  return `${y}-${m}-${d}`;
+}
+
+function loadStudyStats(){
+  try{
+    return JSON.parse(localStorage.getItem("boki_study_stats") || '{"days":{},"totalAnswers":0,"totalCorrect":0}');
+  }catch(e){
+    return {days:{}, totalAnswers:0, totalCorrect:0};
+  }
+}
+
+function saveStudyStats(data){
+  localStorage.setItem("boki_study_stats", JSON.stringify(data));
+}
+
+function recordAnswer(isCorrect){
+  const stats=loadStudyStats();
+  const key=localDateKey();
+  if(!stats.days[key]) stats.days[key]={answers:0, correct:0};
+  stats.days[key].answers++;
+  if(isCorrect) stats.days[key].correct++;
+  stats.totalAnswers=(stats.totalAnswers||0)+1;
+  if(isCorrect) stats.totalCorrect=(stats.totalCorrect||0)+1;
+  saveStudyStats(stats);
+}
+
+function getStudyStreak(stats){
+  let streak=0;
+  let cursor=new Date();
+  while(true){
+    const key=localDateKey(cursor);
+    if(stats.days[key] && stats.days[key].answers>0){
+      streak++;
+      cursor.setDate(cursor.getDate()-1);
+    }else{
+      break;
+    }
+  }
+  return streak;
+}
+
+function updateStudyRecord(){
+  const stats=loadStudyStats();
+  const today=stats.days[localDateKey()] || {answers:0,correct:0};
+  const accuracy=today.answers ? Math.round((today.correct/today.answers)*100)+"%" : "—";
+  document.getElementById("todayAnswers").textContent=today.answers+"問";
+  document.getElementById("todayAccuracy").textContent=accuracy;
+  document.getElementById("streakDays").textContent=getStudyStreak(stats)+"日";
+  document.getElementById("totalAnswers").textContent=(stats.totalAnswers||0)+"問";
+}
+
+function startOfWeek(date=new Date()){
+  const d=new Date(date);
+  const day=d.getDay(); // 0 Sun
+  const diff=(day+6)%7; // Monday start
+  d.setDate(d.getDate()-diff);
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function renderRecords(){
+  const stats=loadStudyStats();
+  const grid=document.getElementById("weekGrid");
+  grid.innerHTML="";
+  const names=["月","火","水","木","金","土","日"];
+  const start=startOfWeek();
+  let weekAnswers=0, weekCorrect=0, best={name:"—", answers:0};
+
+  for(let i=0;i<7;i++){
+    const d=new Date(start);
+    d.setDate(start.getDate()+i);
+    const key=localDateKey(d);
+    const day=stats.days[key] || {answers:0,correct:0};
+    weekAnswers+=day.answers;
+    weekCorrect+=day.correct;
+    if(day.answers>best.answers) best={name:names[i]+"曜", answers:day.answers};
+
+    const el=document.createElement("div");
+    el.className="day-card";
+    el.innerHTML=`
+      <div class="day-name">${names[i]}</div>
+      <div class="day-count">${day.answers}</div>
+      <div class="day-acc">${day.answers ? Math.round(day.correct/day.answers*100)+"%" : "—"}</div>
+    `;
+    grid.appendChild(el);
+  }
+
+  document.getElementById("weekAnswers").textContent=weekAnswers+"問";
+  document.getElementById("weekAccuracy").textContent=weekAnswers ? Math.round(weekCorrect/weekAnswers*100)+"%" : "—";
+  document.getElementById("bestDay").textContent=best.answers ? best.name : "—";
+  document.getElementById("recordWeakCount").textContent=weakItems().length+"問";
+  document.getElementById("recordStreak").textContent=getStudyStreak(stats)+"日";
+  document.getElementById("recordTotal").textContent=(stats.totalAnswers||0)+"問";
+}
+
+function showRecords(){
+  renderRecords();
+  document.getElementById("home").classList.add("hidden");
+  document.getElementById("quizSection").classList.add("hidden");
+  document.getElementById("recordsSection").classList.remove("hidden");
+}
+
+function showHome(){
+  updateWeakCount();
+  updateStudyRecord();
+  document.getElementById("recordsSection").classList.add("hidden");
+  document.getElementById("home").classList.remove("hidden");
+  document.getElementById("quizSection").classList.add("hidden");
+}
+
+let selectedLevel="basic";
+let selectedCount=5;
+
+function levelItems(items){
+  if(selectedLevel==="all") return items;
+  return items.filter(q => selectedLevel==="basic" ? !q.level || q.level==="basic" : q.level==="standard");
+}
+
+function startMode(nextMode, source=null){
+  mode=nextMode;
+  document.getElementById("home").classList.add("hidden");
+  document.getElementById("quizSection").classList.remove("hidden");
+  let items;
+  if(source) items=source;
+  else if(mode==="translate") items=TRANSLATE_ITEMS;
+  else if(mode==="position") items=POSITION_ITEMS;
+  else if(mode==="account") items=levelItems(ACCOUNT_ITEMS);
+  else if(mode==="dc") items=levelItems(DC_ITEMS);
+  else if(mode==="journal") items=levelItems(JOURNAL_ITEMS);
+  else items=weakItems();
+
+  if(mode==="weak" && items.length===0){
+    showHome();
+    alert("いまは苦手問題なし！いい感じ◎");
+    return;
+  }
+  quiz = shuffle(items).slice(0, Math.min(mode==="weak" ? 5 : selectedCount, items.length));
+  index=0; correct=0; missed=[]; locked=false;
+  document.getElementById("quizCard").style.display="block";
+  document.getElementById("resultCard").classList.remove("show");
+  render();
+}
+
+function render(){
+  const q=quiz[index];
+  document.getElementById("count").textContent=`${index+1} / ${quiz.length}`;
+  document.getElementById("bar").style.width=`${(index/quiz.length)*100}%`;
+  const activeMode = mode==="weak" ? q._sourceMode : mode;
+  document.getElementById("modeLabel").textContent = mode==="weak" ? "苦手克服" : activeMode==="translate" ? "ことば → 勘定科目" : activeMode==="position" ? "B/S・P/Lの位置" : activeMode==="account" ? "勘定科目クイズ" : activeMode==="dc" ? "借方・貸方クイズ" : "仕訳クイズ";
+  document.getElementById("word").textContent=q.word;
+  document.getElementById("sub").textContent = activeMode==="translate"
+    ? "このことばは、どの勘定科目？"
+    : activeMode==="position"
+      ? "これはどこにある？"
+      : activeMode==="account"
+        ? "この勘定科目はどのグループ？"
+        : activeMode==="dc"
+          ? "この変化は、借方・貸方どちら側？"
+          : "正しい仕訳はどれ？";
+
+  const box=document.getElementById("choices");
+  box.innerHTML="";
+  const options = activeMode==="account" ? CATEGORIES : activeMode==="dc" ? ["借方","貸方"] : (activeMode==="translate" || activeMode==="position") ? shuffle(q.options) : shuffle(q.options);
+
+  options.forEach(opt=>{
+    const b=document.createElement("button");
+    b.className="choice";
+    if(activeMode==="account") b.dataset.cat=opt;
+    else if(activeMode==="dc") b.dataset.side=opt;
+    else b.style.background="#f3f0ec";
+    b.textContent=opt;
+    b.onclick=()=>answer(opt,b);
+    box.appendChild(b);
+  });
+
+  const feedback=document.getElementById("feedback");
+  feedback.className="feedback";
+  feedback.textContent="";
+  document.getElementById("nextBtn").classList.remove("show");
+  locked=false;
+}
+
+function answer(choice, btn){
+  if(locked) return;
+  locked=true;
+  const q=quiz[index];
+  const activeMode = mode==="weak" ? q._sourceMode : mode;
+  const correctAnswer = activeMode==="account" ? q.cat : activeMode==="dc" ? q.side : q.answer;
+  const buttons=[...document.querySelectorAll(".choice")];
+  buttons.forEach(b=>{
+    b.disabled=true;
+    if(b.textContent===correctAnswer) b.classList.add("correct");
+  });
+
+  const fb=document.getElementById("feedback");
+  recordAnswer(choice===correctAnswer);
+  if(choice===correctAnswer){
+    correct++;
+    let mastered=false;
+    if(mode==="weak") mastered=markWeakCorrect(q, activeMode);
+    fb.className="feedback show ok";
+    fb.innerHTML=`⭕ 正解！<br>${q.ex}${mode==="weak" ? (mastered ? "<br><strong>🎉 2回正解！この問題は克服！</strong>" : "<br>あと1回正解で克服！") : ""}`;
+  }else{
+    btn.classList.add("wrong");
+    missed.push(q);
+    registerWeak(q, activeMode);
+    fb.className="feedback show ng";
+    fb.innerHTML=`❌ 正解は「${correctAnswer}」<br>${q.ex}<br><strong>苦手克服に追加したよ</strong>`;
+  }
+
+  document.getElementById("nextBtn").classList.add("show");
+  document.getElementById("bar").style.width=`${((index+1)/quiz.length)*100}%`;
+}
+
+document.getElementById("nextBtn").onclick=()=>{
+  index++;
+  if(index<quiz.length) render();
+  else finish();
+};
+
+function finish(){
+  document.getElementById("quizCard").style.display="none";
+  const rc=document.getElementById("resultCard");
+  rc.classList.add("show");
+  document.getElementById("score").textContent=`${correct} / ${quiz.length}`;
+  let msg = correct===quiz.length ? "満点！その調子👏" :
+            correct>=4 ? "かなりいい感じ！" :
+            correct>=3 ? "あと一歩。もう1セットで定着しそう。" :
+            "ここから覚えればOK。5問だけ続けよ。";
+  document.getElementById("message").textContent=msg;
+  document.getElementById("missed").textContent=
+    missed.length ? `今回の復習：${missed.map(x=>x.word).join("・")}` : "まちがいなし！";
+
+  const key="boki_sets_"+localDateKey();
+  const n=(+localStorage.getItem(key)||0)+1;
+  localStorage.setItem(key,n);
+  updateStreak();
+  updateStudyRecord();
+  document.getElementById("retryMissed").style.display=missed.length ? "block":"none";
+}
+
+function updateStreak(){
+  const key="boki_sets_"+localDateKey();
+  const n=+localStorage.getItem(key)||0;
+  document.getElementById("streak").textContent=`今日 ${n}セット`;
+}
+
+
+document.querySelectorAll("[data-level]").forEach(btn=>{
+  btn.onclick=()=>{
+    selectedLevel=btn.dataset.level;
+    document.querySelectorAll("[data-level]").forEach(x=>x.classList.toggle("active",x===btn));
+  };
+});
+document.querySelectorAll("[data-count]").forEach(btn=>{
+  btn.onclick=()=>{
+    selectedCount=Number(btn.dataset.count);
+    document.querySelectorAll("[data-count]").forEach(x=>x.classList.toggle("active",x===btn));
+  };
+});
+
+document.getElementById("openRecords").onclick=showRecords;
+document.getElementById("recordsBack").onclick=showHome;
+document.getElementById("translateMode").onclick=()=>startMode("translate");
+document.getElementById("positionMode").onclick=()=>startMode("position");
+document.getElementById("accountMode").onclick=()=>startMode("account");
+document.getElementById("dcMode").onclick=()=>startMode("dc");
+document.getElementById("journalMode").onclick=()=>startMode("journal");
+document.getElementById("weakMode").onclick=()=>startMode("weak");
+document.getElementById("backHome").onclick=showHome;
+document.getElementById("resultHome").onclick=showHome;
+document.getElementById("restart").onclick=()=>startMode(mode);
+document.getElementById("retryMissed").onclick=()=>startMode(mode, missed);
+
+updateStreak();
+updateWeakCount();
+updateStudyRecord();
+showHome();
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js").catch(()=>{}));
+}
+</script>
+</body>
+</html>
