@@ -148,14 +148,22 @@ button:disabled{cursor:default}
   .header{margin-bottom:10px}
   .brand-mascot{width:30px;height:30px}
   .hero{padding:0;background:transparent;border:0;box-shadow:none}
-  .mode{grid-template-columns:30px minmax(0,1fr) 10px;gap:8px;padding:11px 10px;border-radius:18px}
+  .mode-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .mode{
+    min-width:0;height:136px;grid-template-columns:30px minmax(0,1fr) 10px;
+    grid-template-rows:30px 1fr;align-items:start;gap:7px 8px;padding:11px 10px;border-radius:18px;
+  }
   .mode-icon{width:30px;height:30px;border-radius:10px}
   .mode-icon svg{width:20px;height:20px}
-  .mode strong{font-size:16px}
+  .mode-copy{grid-column:1 / -1;align-self:start}
+  .mode strong{font-size:16px;margin-bottom:4px}
+  .mode .mode-desc{font-size:12px;line-height:1.45}
+  .mode-chevron{grid-column:3;grid-row:1;align-self:center}
   .week-grid{grid-template-columns:repeat(7,1fr);gap:5px}
   .day-card{padding:8px 3px}
   .day-count{font-size:16px}
-  .position-title{font-size:15px!important;white-space:nowrap;letter-spacing:-.02em}
+  .position-title{font-size:15px!important;letter-spacing:-.035em;line-height:1.35!important}
+  .position-title span{display:block;white-space:nowrap}
 }
 @media (max-width:420px){.word{font-size:30px}.card{padding:18px}.hero{padding:0}.hero h1{font-size:27px}}
 </style>
@@ -171,7 +179,7 @@ button:disabled{cursor:default}
 <div class="wrap">
   <div class="header">
     <div class="brand">
-      <img class="brand-mascot" src="mascot-onigiri.png" alt="">
+      <img class="brand-mascot" id="timeMascot" src="mascot-morning.png" alt="">
       <span class="brand-title">ひとくち簿記</span>
     </div>
     <div class="badge" id="streak">今日 0セット</div>
@@ -237,7 +245,7 @@ button:disabled{cursor:default}
           <span class="mode-icon icon-position" aria-hidden="true">
             <svg viewBox="0 0 24 24"><path class="icon-soft" d="M3.5 5h7.5v14H3.5zM13 5h7.5v14H13z"/><path class="icon-line" d="M5.8 8h2.9m-2.9 3h2.9m6.5-3h2.9m-2.9 3h2.9"/></svg>
           </span>
-          <span class="mode-copy"><strong class="position-title">貸借対照表（B/S）・損益計算書（P/L）</strong><span class="mode-desc">5つの要素が載る場所を覚える</span></span>
+          <span class="mode-copy"><strong class="position-title"><span>貸借対照表（B/S）・</span><span>損益計算書（P/L）</span></strong><span class="mode-desc">5つの要素が載る場所を覚える</span></span>
           <span class="mode-chevron" aria-hidden="true">›</span>
         </button>
         <button class="mode account" id="accountMode">
@@ -1007,6 +1015,17 @@ function updateStreak(){
   document.getElementById("streak").textContent=`今日 ${n}セット`;
 }
 
+function updateTimeMascot(date=new Date()){
+  const hour=date.getHours();
+  const period=hour>=5 && hour<11 ? "morning"
+    : hour>=11 && hour<17 ? "daytime"
+      : hour>=17 && hour<22 ? "evening"
+        : "late-night";
+  const mascot=document.getElementById("timeMascot");
+  mascot.src=`mascot-${period}.png`;
+  mascot.dataset.period=period;
+}
+
 
 document.querySelectorAll("[data-level]").forEach(btn=>{
   btn.onclick=()=>{
@@ -1047,6 +1066,8 @@ document.getElementById("retryMissed").onclick=()=>startMode(mode, missed);
 document.addEventListener("click", requestPersistentStorage, {once:true});
 
 updateStreak();
+updateTimeMascot();
+setInterval(updateTimeMascot, 60000);
 updateWeakCount();
 updateStudyRecord();
 showHome();

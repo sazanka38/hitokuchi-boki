@@ -1,9 +1,13 @@
-const CACHE_NAME = "hitokuchi-boki-v1.5";
+const CACHE_NAME = "hitokuchi-boki-v1.6";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./mascot-onigiri.png",
+  "./mascot-morning.png",
+  "./mascot-daytime.png",
+  "./mascot-evening.png",
+  "./mascot-late-night.png",
   "./icon-180.png",
   "./icon-192.png",
   "./icon-512.png"
