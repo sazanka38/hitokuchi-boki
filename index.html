@@ -181,8 +181,8 @@ button:disabled{cursor:default}
           <span>取引のことばを、簿記の勘定科目に変換する練習</span>
         </button>
         <button class="mode dc" id="positionMode" style="background:#e2e8e5">
-          <strong>B/S・P/Lの位置</strong>
-          <span>資産・負債・純資産・収益・費用が、どこにあるか覚える</span>
+          <strong>貸借対照表（B/S）・損益計算書（P/L）</strong>
+          <span>資産・負債・純資産・収益・費用の場所を覚える</span>
         </button>
         <button class="mode account" id="accountMode">
           <strong>勘定科目クイズ</strong>
@@ -600,11 +600,11 @@ const TRANSLATE_ITEMS = [
 ];
 
 const POSITION_ITEMS = [
-  {word:"資産",answer:"B/S 左",options:["B/S 左","B/S 右","P/L 左","P/L 右"],ex:"資産は貸借対照表（B/S）の左側。"},
-  {word:"負債",answer:"B/S 右",options:["B/S 左","B/S 右","P/L 左","P/L 右"],ex:"負債は貸借対照表（B/S）の右側。"},
-  {word:"純資産",answer:"B/S 右",options:["B/S 左","B/S 右","P/L 左","P/L 右"],ex:"純資産は貸借対照表（B/S）の右側。"},
-  {word:"費用",answer:"P/L 左",options:["B/S 左","B/S 右","P/L 左","P/L 右"],ex:"費用は損益計算書（P/L）の左側。"},
-  {word:"収益",answer:"P/L 右",options:["B/S 左","B/S 右","P/L 左","P/L 右"],ex:"収益は損益計算書（P/L）の右側。"}
+  {word:"資産",answer:"貸借対照表（B/S）左",options:["貸借対照表（B/S）左","貸借対照表（B/S）右","損益計算書（P/L）左","損益計算書（P/L）右"],ex:"資産は貸借対照表（B/S）の左側。"},
+  {word:"負債",answer:"貸借対照表（B/S）右",options:["貸借対照表（B/S）左","貸借対照表（B/S）右","損益計算書（P/L）左","損益計算書（P/L）右"],ex:"負債は貸借対照表（B/S）の右側。"},
+  {word:"純資産",answer:"貸借対照表（B/S）右",options:["貸借対照表（B/S）左","貸借対照表（B/S）右","損益計算書（P/L）左","損益計算書（P/L）右"],ex:"純資産は貸借対照表（B/S）の右側。"},
+  {word:"費用",answer:"損益計算書（P/L）左",options:["貸借対照表（B/S）左","貸借対照表（B/S）右","損益計算書（P/L）左","損益計算書（P/L）右"],ex:"費用は損益計算書（P/L）の左側。"},
+  {word:"収益",answer:"損益計算書（P/L）右",options:["貸借対照表（B/S）左","貸借対照表（B/S）右","損益計算書（P/L）左","損益計算書（P/L）右"],ex:"収益は損益計算書（P/L）の右側。"}
 ];
 
 let mode="account", quiz=[], index=0, correct=0, missed=[], locked=false;
@@ -818,7 +818,7 @@ function render(){
   document.getElementById("count").textContent=`${index+1} / ${quiz.length}`;
   document.getElementById("bar").style.width=`${(index/quiz.length)*100}%`;
   const activeMode = mode==="weak" ? q._sourceMode : mode;
-  document.getElementById("modeLabel").textContent = mode==="weak" ? "苦手克服" : activeMode==="translate" ? "ことば → 勘定科目" : activeMode==="position" ? "B/S・P/Lの位置" : activeMode==="account" ? "勘定科目クイズ" : activeMode==="dc" ? "借方・貸方クイズ" : "仕訳クイズ";
+  document.getElementById("modeLabel").textContent = mode==="weak" ? "苦手克服" : activeMode==="translate" ? "ことば → 勘定科目" : activeMode==="position" ? "貸借対照表（B/S）・損益計算書（P/L）" : activeMode==="account" ? "勘定科目クイズ" : activeMode==="dc" ? "借方・貸方クイズ" : "仕訳クイズ";
   document.getElementById("word").textContent=q.word;
   document.getElementById("sub").textContent = activeMode==="translate"
     ? "このことばは、どの勘定科目？"

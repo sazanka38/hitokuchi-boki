@@ -1,4 +1,4 @@
-const CACHE_NAME = "hitokuchi-boki-v1.1";
+const CACHE_NAME = "hitokuchi-boki-v1.2";
 const APP_SHELL = [
   "./",
   "./index.html",
