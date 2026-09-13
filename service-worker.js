@@ -3,6 +3,7 @@ const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
+  "./mascot-onigiri.png",
   "./icon-180.png",
   "./icon-192.png",
   "./icon-512.png"
