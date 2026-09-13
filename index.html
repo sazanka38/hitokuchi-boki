@@ -44,8 +44,6 @@ body{
 }
 .mode strong{display:block;font-size:18px;margin-bottom:6px}
 .mode span{font-size:13px;color:var(--muted);font-weight:500;line-height:1.5}
-.position-title .position-title-line,
-.position-title .position-title-separator{font-size:inherit;color:inherit;font-weight:inherit;line-height:inherit}
 .mode.account{background:#eef2ed}
 .mode.dc{background:#f1ece8}
 
@@ -119,9 +117,7 @@ button:disabled{cursor:default}
   .week-grid{grid-template-columns:repeat(7,1fr);gap:5px}
   .day-card{padding:8px 3px}
   .day-count{font-size:16px}
-  .position-title{font-size:16px!important;line-height:1.45}
-  .position-title .position-title-line{display:block}
-  .position-title .position-title-separator{display:none}
+  .position-title{font-size:15px!important;white-space:nowrap}
 }
 @media (max-width:420px){.word{font-size:30px}.card{padding:18px}.hero h1{font-size:27px}}
 </style>
@@ -190,7 +186,7 @@ button:disabled{cursor:default}
           <span>取引のことばを、簿記の勘定科目に変換する練習</span>
         </button>
         <button class="mode dc" id="positionMode" style="background:#e2e8e5">
-          <strong class="position-title"><span class="position-title-line">貸借対照表（B/S）</span><span class="position-title-separator">・</span><span class="position-title-line">損益計算書（P/L）</span></strong>
+          <strong class="position-title">貸借対照表（B/S）・損益計算書（P/L）</strong>
           <span>資産・負債・純資産・収益・費用の場所を覚える</span>
         </button>
         <button class="mode account" id="accountMode">
