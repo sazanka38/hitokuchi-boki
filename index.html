@@ -29,15 +29,15 @@ body{
 .hero h1{font-size:30px;line-height:1.35;margin:0 0 8px}
 .hero p{margin:0;color:var(--muted);line-height:1.7}
 .record-card{
-  margin-top:16px;padding:18px;border-radius:20px;background:#fbfaf8;border:1px solid var(--line);
+  margin-top:14px;padding:14px;border-radius:20px;background:#fbfaf8;border:1px solid var(--line);
 }
-.record-title{font-size:14px;font-weight:800;margin-bottom:12px}
-.record-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.record-item{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 8px;text-align:center}
-.record-value{font-size:20px;font-weight:850;line-height:1.2}
-.record-label{font-size:11px;color:var(--muted);margin-top:5px}
-@media (max-width:520px){.record-grid{grid-template-columns:repeat(2,1fr)}}
-.mode-grid{display:grid;gap:14px;margin-top:18px}
+.record-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.record-title{font-size:14px;font-weight:800}
+.record-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.record-item{background:#fff;border:1px solid var(--line);border-radius:14px;padding:9px 6px;text-align:center}
+.record-value{font-size:18px;font-weight:850;line-height:1.2}
+.record-label{font-size:10px;color:var(--muted);margin-top:4px}
+.mode-grid{display:grid;gap:14px;margin-top:12px}
 .mode{
   text-align:left;padding:20px;border-radius:20px;border:1px solid rgba(80,70,60,.10);
   box-shadow:0 5px 0 rgba(85,75,65,.10),0 9px 18px rgba(80,70,60,.05);
@@ -91,9 +91,20 @@ button:disabled{cursor:default}
   box-shadow:none;margin-bottom:14px
 }
 .record-link{
-  margin-top:12px;background:#f2eee9;font-size:14px;
+  width:auto;min-height:44px;padding:8px 11px;border-radius:13px;background:#f2eee9;
+  box-shadow:none;font-size:13px;white-space:nowrap;
 }
-.quiz-settings{margin-top:18px;padding:16px;border:1px solid var(--line);border-radius:18px;background:#fbfaf8}
+.quiz-settings{margin-top:12px;padding:0;border:1px solid var(--line);border-radius:18px;background:#fbfaf8;overflow:hidden}
+.settings-summary{
+  min-height:48px;padding:11px 14px;border:0;border-radius:0;background:transparent;box-shadow:none;
+  display:flex;align-items:center;justify-content:center;gap:9px;font-size:14px;
+}
+.settings-summary:hover{transform:none}
+.settings-summary:active{transform:none;box-shadow:none;background:#f4f1ed}
+.settings-divider{color:#b5aea6;font-weight:500}
+.settings-chevron{font-size:11px;color:var(--muted);transition:transform .18s ease}
+.settings-summary[aria-expanded="true"] .settings-chevron{transform:rotate(180deg)}
+.settings-panel{padding:14px 12px 12px;border-top:1px solid var(--line)}
 .setting-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .setting-row + .setting-row{margin-top:12px}
 .setting-label{font-size:13px;font-weight:800}
@@ -142,15 +153,14 @@ button:disabled{cursor:default}
       <h1>今日も、ひとくち。</h1>
       <p>ごはん食べながら、電車に乗りながら、<br>ちょっとだけ簿記に触れるためのミニ問題集。</p>
       <div class="record-card">
-        <div class="record-title">今日のきろく</div>
+        <div class="record-head">
+          <div class="record-title">今日のきろく</div>
+          <button class="record-link" id="openRecords">詳しく見る ›</button>
+        </div>
         <div class="record-grid">
           <div class="record-item">
             <div class="record-value" id="todayAnswers">0問</div>
-            <div class="record-label">回答</div>
-          </div>
-          <div class="record-item">
-            <div class="record-value" id="todayAccuracy">—</div>
-            <div class="record-label">正解率</div>
+            <div class="record-label">今日</div>
           </div>
           <div class="record-item">
             <div class="record-value" id="streakDays">0日</div>
@@ -162,21 +172,29 @@ button:disabled{cursor:default}
           </div>
         </div>
       </div>
-      <button class="record-link" id="openRecords">学習きろくを見る</button>
       <div class="quiz-settings">
-        <div class="setting-row">
-          <div class="setting-label">レベル</div>
-          <div class="pill-group">
-            <button class="pill active" data-level="basic">きほん</button>
-            <button class="pill" data-level="standard">ちょいむず</button>
-            <button class="pill" data-level="all">まぜる</button>
+        <button class="settings-summary" id="settingsToggle" type="button" aria-expanded="false" aria-controls="settingsPanel">
+          <span id="selectedLevelSummary">きほん</span>
+          <span class="settings-divider" aria-hidden="true">｜</span>
+          <span id="selectedCountSummary">5問だけ</span>
+          <span class="settings-divider" aria-hidden="true">｜</span>
+          <span class="settings-chevron" aria-hidden="true">▼</span>
+        </button>
+        <div class="settings-panel" id="settingsPanel" hidden>
+          <div class="setting-row">
+            <div class="setting-label">レベル</div>
+            <div class="pill-group">
+              <button class="pill active" data-level="basic">きほん</button>
+              <button class="pill" data-level="standard">ちょいむず</button>
+              <button class="pill" data-level="all">まぜる</button>
+            </div>
           </div>
-        </div>
-        <div class="setting-row">
-          <div class="setting-label">問題数</div>
-          <div class="pill-group">
-            <button class="pill active" data-count="5">5問だけ</button>
-            <button class="pill" data-count="10">10問やる</button>
+          <div class="setting-row">
+            <div class="setting-label">問題数</div>
+            <div class="pill-group">
+              <button class="pill active" data-count="5">5問だけ</button>
+              <button class="pill" data-count="10">10問やる</button>
+            </div>
           </div>
         </div>
       </div>
@@ -721,9 +739,7 @@ function getStudyStreak(stats){
 function updateStudyRecord(){
   const stats=loadStudyStats();
   const today=stats.days[localDateKey()] || {answers:0,correct:0};
-  const accuracy=today.answers ? Math.round((today.correct/today.answers)*100)+"%" : "—";
   document.getElementById("todayAnswers").textContent=today.answers+"問";
-  document.getElementById("todayAccuracy").textContent=accuracy;
   document.getElementById("streakDays").textContent=getStudyStreak(stats)+"日";
   document.getElementById("totalAnswers").textContent=(stats.totalAnswers||0)+"問";
 }
@@ -794,6 +810,10 @@ function showRecords(){
 function showHome(){
   updateWeakCount();
   updateStudyRecord();
+  const settingsPanel=document.getElementById("settingsPanel");
+  const settingsToggle=document.getElementById("settingsToggle");
+  settingsPanel.hidden=true;
+  settingsToggle.setAttribute("aria-expanded","false");
   document.getElementById("recordsSection").classList.add("hidden");
   document.getElementById("home").classList.remove("hidden");
   document.getElementById("quizSection").classList.add("hidden");
@@ -801,6 +821,12 @@ function showHome(){
 
 let selectedLevel="basic";
 let selectedCount=5;
+
+function updateSettingsSummary(){
+  const levelLabels={basic:"きほん",standard:"ちょいむず",all:"まぜる"};
+  document.getElementById("selectedLevelSummary").textContent=levelLabels[selectedLevel];
+  document.getElementById("selectedCountSummary").textContent=selectedCount===5 ? "5問だけ" : "10問やる";
+}
 
 function levelItems(items){
   if(selectedLevel==="all") return items;
@@ -941,14 +967,24 @@ document.querySelectorAll("[data-level]").forEach(btn=>{
   btn.onclick=()=>{
     selectedLevel=btn.dataset.level;
     document.querySelectorAll("[data-level]").forEach(x=>x.classList.toggle("active",x===btn));
+    updateSettingsSummary();
   };
 });
 document.querySelectorAll("[data-count]").forEach(btn=>{
   btn.onclick=()=>{
     selectedCount=Number(btn.dataset.count);
     document.querySelectorAll("[data-count]").forEach(x=>x.classList.toggle("active",x===btn));
+    updateSettingsSummary();
   };
 });
+
+document.getElementById("settingsToggle").onclick=()=>{
+  const toggle=document.getElementById("settingsToggle");
+  const panel=document.getElementById("settingsPanel");
+  const open=panel.hidden;
+  panel.hidden=!open;
+  toggle.setAttribute("aria-expanded",String(open));
+};
 
 document.getElementById("openRecords").onclick=showRecords;
 document.getElementById("recordsBack").onclick=showHome;
