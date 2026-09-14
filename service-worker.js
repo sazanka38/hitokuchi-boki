@@ -1,4 +1,4 @@
-const CACHE_NAME = "hitokuchi-boki-v1.7";
+const CACHE_NAME = "hitokuchi-boki-v1.8";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -8,9 +8,9 @@ const APP_SHELL = [
   "./mascot-daytime.png",
   "./mascot-evening.png",
   "./mascot-late-night.png",
-  "./icon-180.png",
-  "./icon-192.png",
-  "./icon-512.png"
+  "./icon-180-v2.png",
+  "./icon-192-v2.png",
+  "./icon-512-v2.png"
 ];
 
 self.addEventListener("install", event => {
